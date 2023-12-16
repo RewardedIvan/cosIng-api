@@ -1,0 +1,21 @@
+{
+  "dependencies": {
+    "@types/sqlite3": "^3.1.11",
+    "events": "^3.3.0",
+    "excel4node": "^1.8.2",
+    "sqlite3": "^5.1.6"
+  },
+  "name": "cosing",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "dev": "tsc && node build/main.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "type": "module",
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
