@@ -33,6 +33,7 @@ class ResultMetadata {
 	DATASOURCE: string[];
 	annexNo: string[];
 	productTypeBodyParts: string[];
+	publicationDate: nil<string[]>;
 	phEurName: string[];
 	es_ContentType: string[];
 	otherRegulations: string[];
@@ -87,6 +88,10 @@ class SearchResults {
 	spellingSuggestion: nil<string>;
 	bestBets: string[];
 	results: Result[];
+
+	constructor(results: Result[]) {
+		this.results = results;
+	}
 
 	checkApiVersion(): boolean {
 		return this.apiVersion == "2.115";

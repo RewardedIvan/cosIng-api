@@ -11,15 +11,15 @@ function randomString(length: number): string {
 }
 
 class FormDataBuilder {
-  boundary;
-  formdata = [];
+  boundary: string;
+  formdata: Array<string> = [];
   newline = "\n";
 
   constructor(rn: boolean, boundry: nil<string>) {
     this.newline = rn === true ? "\r\n" : "\n";
     if (boundry == undefined)
-      this.boundary = `------WebKitFormBoundary${randomString(16)}`;
-    else this.boundary = boundry;
+      this.boundary = `--thanksrfc7578formakingthisthemostconfusingthingiveseeninmycareer${randomString(16)}`;
+    else this.boundary = `--${boundry}`;
   }
 
   appendField(name: string, mimetype: string, content: string) {
@@ -35,7 +35,7 @@ class FormDataBuilder {
   }
 
   getMimeType(): string {
-    return `multipart/form-data; boundary=${this.boundary}`;
+    return `multipart/form-data; boundary=${this.boundary.substring(2)}`;
   }
 }
 

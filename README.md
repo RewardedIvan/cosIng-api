@@ -1,4 +1,4 @@
-# cosIng api
+# eu cosIng api
 ## run
 
-`npm run dev`
+`npm run excel`
