@@ -8,3 +8,9 @@ no dependencies (except excel4node (and typescript transpiler) but thats only fo
 
 npm run excel
 ![excel](https://i.imgur.com/5UdVN93.png)
+
+TODO:
+- post-process after cache `Identified Ingredients or Substances Names`
+- automate releases
+- remove excel4node from deps and publish npm package
+- docs
