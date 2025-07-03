@@ -1,18 +1,18 @@
 {
-  "dependencies": {
-    "@types/sqlite3": "^3.1.11",
-    "excel4node": "^1.8.2"
-  },
-  "name": "cosing",
-  "version": "1.0.0",
-  "scripts": {
-    "excel": "tsc && node build/excel.js"
-  },
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "type": "module",
-  "devDependencies": {
-    "typescript": "^5.3.3"
-  }
+	"dependencies": {
+		"@types/sqlite3": "^3.1.11",
+		"excel4node": "^1.8.2"
+	},
+	"name": "cosing",
+	"version": "1.0.0",
+	"scripts": {
+		"excel": "tsc && node build/excel.js"
+	},
+	"author": "",
+	"license": "ISC",
+	"description": "",
+	"type": "module",
+	"devDependencies": {
+		"typescript": "^5.3.3"
+	}
 }

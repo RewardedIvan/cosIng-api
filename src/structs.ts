@@ -1,11 +1,9 @@
-import nil from "./nil.js";
-
-class QueryLanguage {
+export interface QueryLanguage {
 	language: string;
 	probability: number;
 }
 
-class ResultMetadata {
+export interface ResultMetadata {
 	nameOfCommonIngredientsGlossary: string[];
 	otherRestrictions: string[];
 	note: string[];
@@ -33,7 +31,7 @@ class ResultMetadata {
 	DATASOURCE: string[];
 	annexNo: string[];
 	productTypeBodyParts: string[];
-	publicationDate: nil<string[]>;
+	publicationDate?: string[];
 	phEurName: string[];
 	es_ContentType: string[];
 	otherRegulations: string[];
@@ -41,7 +39,7 @@ class ResultMetadata {
 	functionName: string[];
 	esDA_IngestDate: string[];
 	currentVersion: string[];
-	'corporate-search-version': string[];
+	"corporate-search-version": string[];
 	url: string[];
 	esST_URL: string[];
 	esDA_QueueDate: string[];
@@ -55,27 +53,27 @@ class ResultMetadata {
 	status: string[];
 }
 
-class Result {
+export interface Result {
 	apiVersion: string;
 	reference: string;
 	url: string;
-	title: nil<string>;
+	title?: string;
 	contentType: string;
 	language: string;
 	databaseLabel: string;
 	database: string;
 	summary: string;
 	weight: number;
-	groupById: nil<string>;
+	groupById?: string;
 	content: string;
 	accessRestriction: boolean;
-	pages: nil<number>;
+	pages?: number;
 	checksum: string;
 	metadata: ResultMetadata;
 	children: Result[];
 }
 
-class SearchResults {
+export interface SearchResults {
 	apiVersion: string;
 	terms: string;
 	responseTime: number;
@@ -83,19 +81,47 @@ class SearchResults {
 	pageNumber: number;
 	pageSize: number;
 	sort: string;
-	groupByField: nil<string>;
+	groupByField?: string;
 	queryLanguage: QueryLanguage;
-	spellingSuggestion: nil<string>;
+	spellingSuggestion?: string;
 	bestBets: string[];
 	results: Result[];
-
-	constructor(results: Result[]) {
-		this.results = results;
-	}
-
-	checkApiVersion(): boolean {
-		return this.apiVersion == "2.115";
-	}
 }
 
-export { SearchResults, QueryLanguage, Result, ResultMetadata };
+export const API_VERSION = "2.138";
+
+export interface Query {
+	bool?: {
+		must?: Query[];
+		should?: Query[];
+		must_not?: Query[];
+		filter?: Query[];
+	};
+
+	text?: {
+		query: string;
+		fields: string[];
+		defaultOperator?: "AND" | "OR";
+	};
+
+	terms?: {
+		[field: string]: string[];
+	};
+
+	term?: {
+		[field: string]: string | number | boolean;
+	};
+
+	match?: {
+		[field: string]: string | number | boolean;
+	};
+
+	range?: {
+		[field: string]: {
+			gte?: number | string;
+			lte?: number | string;
+			gt?: number | string;
+			lt?: number | string;
+		};
+	};
+}

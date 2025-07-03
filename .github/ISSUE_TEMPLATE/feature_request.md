@@ -1,10 +1,9 @@
 ---
 name: Feature request
 about: "i forgor \U0001F480"
-title: ''
+title: ""
 labels: enhancement
 assignees: RewardedIvan
-
 ---
 
 **Is your feature request related to a problem? Please describe.**

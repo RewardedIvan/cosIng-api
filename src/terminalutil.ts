@@ -1,37 +1,35 @@
-class TerminalUtil {
-	static CSI = "\u001b[";
+const CSI = "\u001b[";
 
-	static write(str: string) {
-		process.stdout.write(str);
-	}
-
-	static PrevLine(amount: number = 1) {
-		this.write(`${this.CSI}${amount}F`);
-	}
-
-	static NextLine(amount: number = 1) {
-		this.write(`${this.CSI}${amount}E`);
-	}
-
-	static ClearLine() {
-		this.write(`${this.CSI}0K`);
-	}
-
-	static MoveCursor(row: number, col: number) { // 1-indexed
-		this.write(`${this.CSI}${row};${col}H`);
-	}
-
-	static MoveHorizontal(col: number) { // 1-indexed
-		this.write(`${this.CSI}${col}G`);
-	}
-
-	static OverrideLastLine(obj: string) {
-		this.PrevLine();
-		this.MoveHorizontal(1);
-		this.ClearLine();
-		this.write(obj);
-		this.NextLine();
-	}
+export function write(str: string) {
+	process.stdout.write(str);
 }
 
-export default TerminalUtil;
+export function prevLine(amount: number = 1) {
+	write(`${CSI}${amount}F`);
+}
+
+export function nextLine(amount: number = 1) {
+	write(`${CSI}${amount}E`);
+}
+
+export function clearLine() {
+	write(`${CSI}0K`);
+}
+
+export function moveCursor(row: number, col: number) {
+	// 1-indexed
+	write(`${CSI}${row};${col}H`);
+}
+
+export function moveHorizontal(col: number) {
+	// 1-indexed
+	write(`${CSI}${col}G`);
+}
+
+export function overrideLastLine(obj: string) {
+	prevLine();
+	moveHorizontal(1);
+	clearLine();
+	write(obj);
+	nextLine();
+}

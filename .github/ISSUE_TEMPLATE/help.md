@@ -1,10 +1,9 @@
 ---
 name: help
 about: idk what im doing pls help
-title: ''
+title: ""
 labels: help wanted
 assignees: RewardedIvan
-
 ---
 
 ask something
