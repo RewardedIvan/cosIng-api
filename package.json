@@ -1,12 +1,15 @@
 {
 	"dependencies": {
+		"@types/jsdom": "^21.1.7",
 		"@types/sqlite3": "^3.1.11",
-		"excel4node": "^1.8.2"
+		"excel4node": "^1.8.2",
+		"jsdom": "^26.1.0"
 	},
 	"name": "cosing",
 	"version": "1.0.0",
 	"scripts": {
-		"excel": "tsc && node build/excel.js"
+		"paged": "tsc && node build/excel/paged.js",
+		"fromRegulation": "tsc && node build/excel/fromRegulation.js"
 	},
 	"author": "",
 	"license": "ISC",

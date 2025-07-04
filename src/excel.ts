@@ -1,148 +1,117 @@
-import { getPage, initializeApi, saveCache } from "./api.js";
 import * as term from "./terminalutil.js";
-import { ResultMetadata } from "./structs.js";
+import { ResultMetadata, SearchResults } from "./structs.js";
 
 import xl from "excel4node";
-import readline from "readline";
 
-const pageSize = 200;
-const pages = 100;
+export type ColDataType = string | number | Date | URL;
 
-initializeApi("285a77fd-1257-4271-8507-f0c6b2961203");
-
-const wb = new xl.Workbook({
-	author: "https://github.com/RewardedIvan/cosIng-api",
-});
-const ws = wb.addWorksheet("CosIng");
-let exiting = false;
-
-async function Save(cb: () => void = () => {}) {
-	await saveCache();
-	console.log(`Writing to xlsx (${c - 2 /* remove 1 leftover + header */} results)`);
-	wb.write("out.xlsx", cb);
-}
-
-if (process.platform === "win32") {
-	const intf = readline.createInterface({
-		input: process.stdin,
-		output: process.stdout,
-	});
-
-	intf.on("SIGINT", function () {
-		process.emit("SIGINT");
-	});
-}
-
-process.on("SIGINT", async () => {
-	exiting = true;
-	await Save(() => process.exit());
-});
-
-const m: Map<string, (md: ResultMetadata) => any> = new Map();
-m.set("Substance ID", (md: ResultMetadata) => Number(md.substanceId[0]));
-m.set("Type", (md: ResultMetadata) => md.itemType.join(", "));
-m.set("INCI Name", (md: ResultMetadata) => md.inciName.join(", "));
-m.set(
+const cols: Map<string, (md: ResultMetadata) => ColDataType> = new Map();
+cols.set("Substance ID", md => Number(md.substanceId[0]));
+cols.set("Type", md => md.itemType.join(", "));
+cols.set("INCI Name", md => md.inciName.join(", "));
+cols.set(
 	"URL",
-	(md: ResultMetadata) =>
+	md =>
 		new URL(`https://ec.europa.eu/growth/tools-databases/cosing/details/${md.substanceId[0]}`),
 );
-m.set("Chemical Description", (md: ResultMetadata) => md.chemicalDescription.join(", "));
-m.set("CAS #", (md: ResultMetadata) => md.casNo.join(", "));
-m.set("EC #", (md: ResultMetadata) => md.ecNo.join(", "));
-m.set("Chemical Name", (md: ResultMetadata) => md.chemicalName.join(", "));
-m.set("Related Regulations", (md: ResultMetadata) => md.relatedRegulations.join(", "));
-m.set("Other Regulations", (md: ResultMetadata) => md.otherRegulations.join(", "));
-m.set("Functions", (md: ResultMetadata) => md.functionName.join(", "));
-m.set("SCCS Opinions", (md: ResultMetadata) => md.sccsOpinion.join(", "));
-m.set("SCCS Opinions URLs", (md: ResultMetadata) => md.sccsOpinionUrls.join(", "));
-m.set("Status", (md: ResultMetadata) => md.status.join(", "));
-m.set("Annex / Ref #", (md: ResultMetadata) =>
+cols.set("Chemical Description", md => md.chemicalDescription.join(", "));
+cols.set("CAS #", md => md.casNo.join(", "));
+cols.set("EC #", md => md.ecNo.join(", "));
+cols.set("Chemical Name", md => md.chemicalName.join(", "));
+cols.set("Related Regulations", md => md.relatedRegulations.join(", "));
+cols.set("Other Regulations", md => md.otherRegulations.join(", "));
+cols.set("Functions", md => md.functionName.join(", "));
+cols.set("SCCS Opinions", md => md.sccsOpinion.join(", "));
+cols.set("SCCS Opinions URLs", md => md.sccsOpinionUrls.join(", "));
+cols.set("Status", md => md.status.join(", "));
+cols.set("Annex / Ref #", md =>
 	md.annexNo.length > 0 ? `${md.annexNo.join(", ")} / ${md.refNo.join(", ")}` : "",
 );
-m.set("Publication Date", (md: ResultMetadata) =>
+cols.set("Publication Date", md =>
 	md.publicationDate != undefined && md.publicationDate.length > 0
 		? new Date(md.publicationDate[0])
 		: "",
 );
-m.set("Identified Ingredients or Substances IDs", (md: ResultMetadata) =>
-	md.identifiedIngredient.join(", "),
-);
-m.set("Identified Ingredients or Substances URLs", (md: ResultMetadata) =>
+cols.set("Identified Ingredients or Substances IDs", md => md.identifiedIngredient.join(", "));
+cols.set("Identified Ingredients or Substances URLs", md =>
 	md.identifiedIngredient
 		.map(v => `https://ec.europa.eu/growth/tools-databases/cosing/details/${v}`)
 		.join(", "),
 );
-m.set("Note", (md: ResultMetadata) => md.note.join(", "));
+cols.set("Note", md => md.note.join(", "));
 
-console.log("Writing headers");
+export async function createSheet<T>(
+	filename: string,
+	extraCols: Map<string, (md: ResultMetadata, user: T) => ColDataType>,
+	results: [ResultMetadata, T][],
+) {
+	const wb = new xl.Workbook({
+		author: "https://github.com/RewardedIvan/cosIng-api",
+	});
+	const ws = wb.addWorksheet("CosIng");
 
-let c = 1; // cursor
-m.forEach((val, key) => {
-	ws.cell(1, c).string(key);
-	term.overrideLastLine(`Writing header ${c}`);
-	c++;
-});
-ws.cell(1, c).string(`Page (${pageSize} elements each)`); // page
+	async function save() {
+		console.log(`Writing to xlsx (${cy - 2 /* remove 1 leftover + header */} results)`);
+		await new Promise(resolve => wb.write(filename, resolve));
+	}
 
-term.overrideLastLine(`Headers written, writing pages`);
+	term.setupSafeExit(save);
 
-console.log(`...`);
-console.log(`...`);
-c = 2;
-for (let p = 1; p <= pages; p++) {
-	if (exiting) break;
+	console.log("Writing headers");
 
-	term.overrideLastLine(`Fetching page ${p}`);
+	let cy = 1,
+		cx = 1; // cursors
+	for (const name of [...cols.keys(), ...extraCols.keys()]) {
+		ws.cell(cy, cx).string(name);
+		term.overrideLastLine(`Writing header ${cy}`);
+		cx++;
+	}
 
-	const pageRes = await getPage(p, pageSize);
+	term.overrideLastLine(`Headers written, writing pages`);
 
-	term.prevLine();
-	term.overrideLastLine(
-		`Page ${p}/${pages} [${pageRes.responseTime ? pageRes.responseTime + "ms" : "CACHED"}]`,
-	);
-	term.nextLine();
+	console.log(`...`);
+	console.log(`...`);
+	cy = 2;
+	cx = 1;
+	for (const [resIdx, [res, user]] of results.entries()) {
+		if (term.exiting) break;
 
-	pageRes.results.forEach(res => {
-		let c2 = 1; // cursor 2
-		term.overrideLastLine(
-			`Writing result ${pageRes.results.indexOf(res) + 1}/${pageRes.results.length}`,
-		);
+		term.overrideLastLine(`Writing result ${resIdx}`);
 
-		if (res.metadata.substanceId == undefined) {
-			term.overrideLastLine(`Skipped invalid result ${pageRes.results.indexOf(res) + 1}`);
-			return; // continue in a lambda
+		if (res.substanceId == undefined) {
+			term.overrideLastLine(`Skipped invalid result ${resIdx}`);
+			continue;
 		}
 
-		m.forEach((val, key) => {
-			const out = val(res.metadata);
+		for (const val of [...cols.values(), ...extraCols.values()]) {
+			const out = val(res, user);
 
 			switch (typeof out) {
 				case "string":
-					ws.cell(c, c2).string(String(out));
+					ws.cell(cy, cx).string(String(out));
 					break;
 				case "number":
-					ws.cell(c, c2).number(Number(out));
+					ws.cell(cy, cx).number(Number(out));
 					break;
 				case "object":
 					switch (out.constructor.name) {
 						case "URL":
-							ws.cell(c, c2).link(String(out));
+							ws.cell(cy, cx).link(String(out));
 							break;
 						case "Date":
-							ws.cell(c, c2).date(out);
+							ws.cell(cy, cx).date(out);
 					}
 				default:
 					break;
 			}
 
-			c2++;
-		});
-		ws.cell(c, c2).number(p); // page
-		term.overrideLastLine(`Finished page ${p}`);
+			cx++;
+		}
+		term.overrideLastLine(`Finished result ${resIdx}`);
 
-		c++;
-	});
+		cx = 1;
+		cy++;
+	}
+
+	await save();
 }
-
-await Save(() => process.exit());
