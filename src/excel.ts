@@ -20,6 +20,7 @@ cols.set("EC #", md => md.ecNo.join(", "));
 cols.set("Chemical Name", md => md.chemicalName.join(", "));
 cols.set("Related Regulations", md => md.relatedRegulations.join(", "));
 cols.set("Other Regulations", md => md.otherRegulations.join(", "));
+cols.set("Cosmetic Restriction", md => md.cosmeticRestriction.join(", "));
 cols.set("Functions", md => md.functionName.join(", "));
 cols.set("SCCS Opinions", md => md.sccsOpinion.join(", "));
 cols.set("SCCS Opinions URLs", md => md.sccsOpinionUrls.join(", "));
